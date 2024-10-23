@@ -10,7 +10,11 @@ public class UserMapper {
     }
 
     public static User toUser(UserRequestDto dto) {
-        return new User(dto.id(), dto.name(), dto.email(), dto.password());
+        User user = new User();
+        user.setName(dto.name());
+        user.setEmail(dto.email());
+        user.setPassword(dto.password());
+        return user;
     }
 
     public static UserResponseDto toUserDto(User user) {
