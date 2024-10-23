@@ -1,6 +1,6 @@
 package com.sirkaue.demojunit5.resource;
 
-import com.sirkaue.demojunit5.domain.User;
+import com.sirkaue.demojunit5.dto.response.UserResponseDto;
 import com.sirkaue.demojunit5.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +19,8 @@ public class UserResource {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<User> findById(@PathVariable Long id) {
-        User user = userService.findById(id);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserResponseDto> findById(@PathVariable Long id) {
+        UserResponseDto dto = userService.findById(id);
+        return ResponseEntity.ok(dto);
     }
 }
