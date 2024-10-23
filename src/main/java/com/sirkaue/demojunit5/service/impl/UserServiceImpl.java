@@ -8,6 +8,8 @@ import com.sirkaue.demojunit5.repository.UserRepository;
 import com.sirkaue.demojunit5.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -21,5 +23,11 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto findById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
         return UserMapper.toUserDto(user);
+    }
+
+    @Override
+    public List<UserResponseDto> findAll() {
+        List<User> users = userRepository.findAll();
+        return UserMapper.toUserDto(users);
     }
 }
