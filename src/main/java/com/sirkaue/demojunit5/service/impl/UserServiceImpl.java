@@ -1,7 +1,9 @@
 package com.sirkaue.demojunit5.service.impl;
 
 import com.sirkaue.demojunit5.domain.User;
+import com.sirkaue.demojunit5.dto.response.UserResponseDto;
 import com.sirkaue.demojunit5.exception.ObjectNotFoundException;
+import com.sirkaue.demojunit5.mapper.UserMapper;
 import com.sirkaue.demojunit5.repository.UserRepository;
 import com.sirkaue.demojunit5.service.UserService;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+    public UserResponseDto findById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        return UserMapper.toUserDto(user);
     }
 }

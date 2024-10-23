@@ -1,8 +1,8 @@
 package com.sirkaue.demojunit5.service;
 
-import com.sirkaue.demojunit5.domain.User;
+import com.sirkaue.demojunit5.dto.response.UserResponseDto;
 
 public interface UserService {
 
-    User findById(Long id);
+    UserResponseDto findById(Long id);
 }
