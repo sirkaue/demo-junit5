@@ -1,11 +1,14 @@
 package com.sirkaue.demojunit5.service.impl;
 
 import com.sirkaue.demojunit5.domain.User;
+import com.sirkaue.demojunit5.dto.request.UserRequestDto;
 import com.sirkaue.demojunit5.dto.response.UserResponseDto;
+import com.sirkaue.demojunit5.exception.EmailUniqueViolationException;
 import com.sirkaue.demojunit5.exception.ObjectNotFoundException;
 import com.sirkaue.demojunit5.mapper.UserMapper;
 import com.sirkaue.demojunit5.repository.UserRepository;
 import com.sirkaue.demojunit5.service.UserService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,5 +32,16 @@ public class UserServiceImpl implements UserService {
     public List<UserResponseDto> findAll() {
         List<User> users = userRepository.findAll();
         return UserMapper.toUserDto(users);
+    }
+
+    @Override
+    public UserResponseDto create(UserRequestDto dto) {
+        User user = UserMapper.toUser(dto);
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new EmailUniqueViolationException("Email already exists");
+        }
+        return UserMapper.toUserDto(user);
     }
 }
