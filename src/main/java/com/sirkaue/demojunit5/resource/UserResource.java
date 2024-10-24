@@ -20,14 +20,14 @@ public class UserResource {
         this.userService = userService;
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> findById(@PathVariable Long id) {
         UserResponseDto dto = userService.findById(id);
         return ResponseEntity.ok(dto);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> findAll(){
+    public ResponseEntity<List<UserResponseDto>> findAll() {
         List<UserResponseDto> users = userService.findAll();
         return ResponseEntity.ok(users);
     }
