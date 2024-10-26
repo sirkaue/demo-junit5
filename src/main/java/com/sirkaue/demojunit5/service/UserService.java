@@ -12,4 +12,6 @@ public interface UserService {
     List<UserResponseDto> findAll();
 
     UserResponseDto create(UserRequestDto dto);
+
+    void update(Long id, UserRequestDto dto);
 }
