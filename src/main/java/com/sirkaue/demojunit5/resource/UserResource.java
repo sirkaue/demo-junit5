@@ -43,4 +43,10 @@ public class UserResource {
                 .toUri();
         return ResponseEntity.created(uri).build();
     }
+
+    @PutMapping(ID)
+    public ResponseEntity<Void> update(@PathVariable Long id, @RequestBody UserRequestDto dto) {
+        userService.update(id, dto);
+        return ResponseEntity.noContent().build();
+    }
 }
