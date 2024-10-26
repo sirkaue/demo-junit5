@@ -10,6 +10,7 @@ import com.sirkaue.demojunit5.repository.UserRepository;
 import com.sirkaue.demojunit5.service.UserService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,18 +24,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDto findById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
         return UserMapper.toUserDto(user);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserResponseDto> findAll() {
         List<User> users = userRepository.findAll();
         return UserMapper.toUserDto(users);
     }
 
     @Override
+    @Transactional
     public UserResponseDto create(UserRequestDto dto) {
         User user = UserMapper.toUser(dto);
         try {
@@ -43,5 +47,22 @@ public class UserServiceImpl implements UserService {
             throw new EmailUniqueViolationException("Email already exists");
         }
         return UserMapper.toUserDto(user);
+    }
+
+    @Override
+    @Transactional
+    public void update(Long id, UserRequestDto dto) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new ObjectNotFoundException("User not found with id: " + id));
+
+        String userEmail = user.getEmail();
+        if (!userEmail.equals(dto.email()) && userRepository.existsByEmail(dto.email())) {
+            throw new EmailUniqueViolationException("Email is already in use by another user.");
+        }
+
+        user.setName(dto.name());
+        user.setEmail(dto.email());
+        user.setPassword(dto.password());
+        userRepository.save(user);
     }
 }
