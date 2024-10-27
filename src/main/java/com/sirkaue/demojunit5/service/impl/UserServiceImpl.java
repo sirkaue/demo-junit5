@@ -65,4 +65,14 @@ public class UserServiceImpl implements UserService {
         user.setPassword(dto.password());
         userRepository.save(user);
     }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ObjectNotFoundException("User not found with id: " + id);
+        }
+
+        userRepository.deleteById(id);
+    }
 }
