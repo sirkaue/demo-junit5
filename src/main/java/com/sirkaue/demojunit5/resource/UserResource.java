@@ -15,7 +15,7 @@ import java.util.List;
 public class UserResource {
 
     public static final String ID = "/{id}";
-    
+
     private final UserService userService;
 
     public UserResource(UserService userService) {
@@ -47,6 +47,12 @@ public class UserResource {
     @PutMapping(ID)
     public ResponseEntity<Void> update(@PathVariable Long id, @RequestBody UserRequestDto dto) {
         userService.update(id, dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(ID)
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        userService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
