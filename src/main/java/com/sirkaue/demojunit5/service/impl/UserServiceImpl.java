@@ -18,35 +18,37 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserResponseDto findById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
-        return UserMapper.toUserDto(user);
+        return userMapper.toUserDto(user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<UserResponseDto> findAll() {
         List<User> users = userRepository.findAll();
-        return UserMapper.toUserDto(users);
+        return userMapper.toUserDto(users);
     }
 
     @Override
     @Transactional
     public UserResponseDto create(UserRequestDto dto) {
-        User user = UserMapper.toUser(dto);
+        User user = userMapper.toUser(dto);
         try {
             userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
             throw new EmailUniqueViolationException("Email already exists");
         }
-        return UserMapper.toUserDto(user);
+        return userMapper.toUserDto(user);
     }
 
     @Override
