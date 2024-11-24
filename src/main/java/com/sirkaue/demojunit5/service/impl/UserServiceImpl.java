@@ -42,12 +42,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto create(UserRequestDto dto) {
-        User user = userMapper.toUser(dto);
-        try {
-            userRepository.save(user);
-        } catch (DataIntegrityViolationException ex) {
+        if (userRepository.existsByEmail(dto.email())) {
             throw new EmailUniqueViolationException("Email already exists");
         }
+
+        User user = userMapper.toUser(dto);
+        userRepository.save(user);
         return userMapper.toUserDto(user);
     }
 
