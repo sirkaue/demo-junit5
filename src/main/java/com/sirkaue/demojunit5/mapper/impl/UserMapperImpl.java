@@ -4,10 +4,12 @@ import com.sirkaue.demojunit5.domain.User;
 import com.sirkaue.demojunit5.dto.request.UserRequestDto;
 import com.sirkaue.demojunit5.dto.response.UserResponseDto;
 import com.sirkaue.demojunit5.mapper.UserMapper;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class UserMapperImpl implements UserMapper {
 
     @Override
