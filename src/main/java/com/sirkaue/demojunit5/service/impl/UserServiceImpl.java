@@ -8,7 +8,6 @@ import com.sirkaue.demojunit5.exception.ObjectNotFoundException;
 import com.sirkaue.demojunit5.mapper.UserMapper;
 import com.sirkaue.demojunit5.repository.UserRepository;
 import com.sirkaue.demojunit5.service.UserService;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponseDto findById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        User user = findUserById(id);
         return userMapper.toUserDto(user);
     }
 
@@ -42,9 +41,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto create(UserRequestDto dto) {
-        if (userRepository.existsByEmail(dto.email())) {
-            throw new EmailUniqueViolationException("Email already exists");
-        }
+        validateUniqueEmail(dto.email());
 
         User user = userMapper.toUser(dto);
         userRepository.save(user);
@@ -54,12 +51,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void update(Long id, UserRequestDto dto) {
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new ObjectNotFoundException("User not found with id: " + id));
+        User user = findUserById(id);
 
-        String userEmail = user.getEmail();
-        if (!userEmail.equals(dto.email()) && userRepository.existsByEmail(dto.email())) {
-            throw new EmailUniqueViolationException("Email is already in use by another user.");
+        if (!user.getEmail().equals(dto.email())) {
+            validateUniqueEmail(dto.email());
         }
 
         user.setName(dto.name());
@@ -71,10 +66,18 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new ObjectNotFoundException("User not found with id: " + id);
-        }
+        User user = findUserById(id);
+        userRepository.delete(user);
+    }
 
-        userRepository.deleteById(id);
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("User not found with id: " + id));
+    }
+
+    private void validateUniqueEmail(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailUniqueViolationException("Email already exists: " + email);
+        }
     }
 }
