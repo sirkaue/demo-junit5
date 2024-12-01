@@ -15,6 +15,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.junit.jupiter.api.function.Executable;
+
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -83,5 +85,27 @@ class UserServiceImplTest {
 
         verify(userRepository, times(1)).findById(nonExistingId);
         verify(userMapper, Mockito.never()).toUserDto(user);
+    }
+
+    @Test
+    void shouldFindAllWhenUsersExist() {
+        // Arrange
+        final int EXPECTED_USER_COUNT = 1;
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(userMapper.toUserDto(List.of(user))).thenReturn(List.of(userResponseDto));
+
+        // Act
+        List<UserResponseDto> result = userService.findAll();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(EXPECTED_USER_COUNT, result.size());
+        assertEquals(user.getId(), result.get(0).id());
+        assertEquals(user.getName(), result.get(0).name());
+        assertEquals(user.getEmail(), result.get(0).email());
+
+        verify(userRepository, times(1)).findAll();
+        verify(userMapper, times(1)).toUserDto(List.of(user));
     }
 }
