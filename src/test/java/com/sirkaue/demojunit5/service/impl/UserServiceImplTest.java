@@ -108,4 +108,21 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).findAll();
         verify(userMapper, times(1)).toUserDto(List.of(user));
     }
+
+    @Test
+    void shouldReturnEmptyListWhenNoUsersExist() {
+        // Arrange
+        when(userRepository.findAll()).thenReturn(List.of());
+        when(userMapper.toUserDto(List.of())).thenReturn(List.of());
+
+        // Act
+        List<UserResponseDto> result = userService.findAll();
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(userRepository, times(1)).findAll();
+        verify(userMapper, times(1)).toUserDto(List.of());
+    }
 }
