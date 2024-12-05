@@ -1,6 +1,7 @@
 package com.sirkaue.demojunit5.service.impl;
 
 import com.sirkaue.demojunit5.domain.User;
+import com.sirkaue.demojunit5.dto.request.UserRequestDto;
 import com.sirkaue.demojunit5.dto.response.UserResponseDto;
 import com.sirkaue.demojunit5.exception.ObjectNotFoundException;
 import com.sirkaue.demojunit5.factory.UserFactory;
@@ -124,5 +125,27 @@ class UserServiceImplTest {
 
         verify(userRepository, times(1)).findAll();
         verify(userMapper, times(1)).toUserDto(List.of());
+    }
+
+    @Test
+    void shouldCreateWhenUserDoesNotExist() {
+        // Arrange
+        when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
+        when(userMapper.toUser(Mockito.any())).thenReturn(user);
+        when(userRepository.save(user)).thenReturn(user);
+        when(userMapper.toUserDto(user)).thenReturn(userResponseDto);
+
+        // Act
+        UserResponseDto result = userService.create(new UserRequestDto(user.getName(), user.getEmail(), user.getPassword()));
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(user.getId(), result.id());
+        assertEquals(user.getName(), result.name());
+        assertEquals(user.getEmail(), result.email());
+
+        verify(userMapper, times(1)).toUser(Mockito.any());
+        verify(userRepository, times(1)).save(user);
+        verify(userMapper, times(1)).toUserDto(user);
     }
 }
