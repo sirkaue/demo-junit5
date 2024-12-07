@@ -3,6 +3,7 @@ package com.sirkaue.demojunit5.service.impl;
 import com.sirkaue.demojunit5.domain.User;
 import com.sirkaue.demojunit5.dto.request.UserRequestDto;
 import com.sirkaue.demojunit5.dto.response.UserResponseDto;
+import com.sirkaue.demojunit5.exception.EmailUniqueViolationException;
 import com.sirkaue.demojunit5.exception.ObjectNotFoundException;
 import com.sirkaue.demojunit5.factory.UserFactory;
 import com.sirkaue.demojunit5.mapper.UserMapper;
@@ -10,12 +11,11 @@ import com.sirkaue.demojunit5.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import org.junit.jupiter.api.function.Executable;
 
 import java.util.List;
 import java.util.Optional;
@@ -147,5 +147,27 @@ class UserServiceImplTest {
         verify(userMapper, times(1)).toUser(Mockito.any());
         verify(userRepository, times(1)).save(user);
         verify(userMapper, times(1)).toUserDto(user);
+    }
+
+    @Test
+    void shouldNotCreateAndThrowEmailUniqueViolationExceptionWhenEmailIsAlreadyInUse() {
+        // Arrange
+        final String EXPECTED_MESSAGE = "Email already exists: " + user.getEmail();
+
+        when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
+
+        // Act
+        Executable executable = () -> userService.create(new UserRequestDto(user.getName(), user.getEmail(), user.getPassword()));
+
+        // Assert
+        var exception = assertThrows(EmailUniqueViolationException.class, executable);
+
+        assertEquals(EXPECTED_MESSAGE, exception.getMessage());
+        assertEquals(user.getId(), userResponseDto.id());
+        assertEquals(user.getName(), userResponseDto.name());
+        assertEquals(user.getEmail(), userResponseDto.email());
+
+        verify(userRepository, Mockito.never()).save(user);
+        verify(userMapper, Mockito.never()).toUserDto(user);
     }
 }
