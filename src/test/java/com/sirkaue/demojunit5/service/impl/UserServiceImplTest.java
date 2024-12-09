@@ -170,4 +170,24 @@ class UserServiceImplTest {
         verify(userRepository, Mockito.never()).save(user);
         verify(userMapper, Mockito.never()).toUserDto(user);
     }
+
+    @Test
+    void shouldThrowEmailUniqueViolationExceptionWhenEmailExists() {
+        // Arrange
+        final String EXPECTED_MESSAGE = "Email already exists: " + user.getEmail();
+
+        when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
+
+        // Act
+        Executable executable = () -> userService.create(new UserRequestDto(user.getName(), user.getEmail(), user.getPassword()));
+
+        // Assert
+        var exception = assertThrows(EmailUniqueViolationException.class, executable);
+        assertEquals(EXPECTED_MESSAGE, exception.getMessage());
+
+        verify(userRepository, times(1)).existsByEmail(user.getEmail());
+        verify(userMapper, never()).toUser(any(UserRequestDto.class));
+        verify(userRepository, never()).save(any(User.class));
+        verify(userMapper, never()).toUserDto(any(User.class));
+    }
 }
