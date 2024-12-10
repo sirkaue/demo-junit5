@@ -36,6 +36,7 @@ class UserServiceImplTest {
     private UserServiceImpl userService;
 
     private User user;
+    private UserRequestDto userRequestDto;
     private UserResponseDto userResponseDto;
     private Long existingId;
     private Long nonExistingId;
@@ -43,6 +44,7 @@ class UserServiceImplTest {
     @BeforeEach
     void setUp() {
         user = UserFactory.createDefaultUser();
+        userRequestDto = UserFactory.createDefaultUserRequestDto();
         userResponseDto = UserFactory.createDefaultUserResponseDto();
         existingId = UserFactory.getExistingId();
         nonExistingId = UserFactory.getNonExistingId();
@@ -189,5 +191,24 @@ class UserServiceImplTest {
         verify(userMapper, never()).toUser(any(UserRequestDto.class));
         verify(userRepository, never()).save(any(User.class));
         verify(userMapper, never()).toUserDto(any(User.class));
+    }
+
+    @Test
+    void shouldUpdateWhenUserExists() {
+        // Arrange
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmail(userRequestDto.email())).thenReturn(false);
+
+        // Act
+        userService.update(user.getId(), userRequestDto);
+
+        // Assert
+        assertEquals(userRequestDto.name(), user.getName());
+        assertEquals(userRequestDto.email(), user.getEmail());
+        assertEquals(userRequestDto.password(), user.getPassword());
+
+        verify(userRepository, times(1)).findById(user.getId());
+        verify(userRepository, times(1)).existsByEmail(userRequestDto.email());
+        verify(userRepository, times(1)).save(user);
     }
 }
