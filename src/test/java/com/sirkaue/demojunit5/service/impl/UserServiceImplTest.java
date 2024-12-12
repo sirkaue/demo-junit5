@@ -258,4 +258,18 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).existsByEmail(updatedEmail);
         verify(userRepository, never()).save(user);
     }
+
+    @Test
+    void shouldDeleteWhenUserExists() {
+        // Arrange
+        when(userRepository.findById(existingId)).thenReturn(Optional.of(user));
+
+        // Act
+        userService.delete(existingId);
+
+        // Assert
+        verify(userRepository, Mockito.times(1)).findById(existingId);
+        verify(userRepository, Mockito.times(1)).delete(user);
+        verify(userRepository, Mockito.never()).deleteById(nonExistingId);
+    }
 }
