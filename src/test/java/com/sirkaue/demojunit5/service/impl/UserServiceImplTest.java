@@ -211,4 +211,26 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).existsByEmail(userRequestDto.email());
         verify(userRepository, times(1)).save(user);
     }
+
+    @Test
+    void shouldNotUpdateAndThrowObjectNotFoundExceptionWhenUserDoesNotExist() {
+        // Arrange
+        final String EXPECTED_MESSAGE = "User not found with id: " + nonExistingId;
+
+        when(userRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        // Act
+        var exception = assertThrows(ObjectNotFoundException.class,
+                () -> userService.update(nonExistingId, new UserRequestDto(user.getName(), user.getEmail(), user.getPassword())));
+
+        // Assert
+        assertEquals(EXPECTED_MESSAGE, exception.getMessage());
+        assertEquals(user.getId(), userResponseDto.id());
+        assertEquals(user.getName(), userResponseDto.name());
+        assertEquals(user.getEmail(), userResponseDto.email());
+
+        verify(userRepository, Mockito.times(1)).findById(nonExistingId);
+        verify(userRepository, Mockito.never()).existsByEmail(user.getEmail());
+        verify(userRepository, Mockito.never()).save(user);
+    }
 }
