@@ -272,4 +272,22 @@ class UserServiceImplTest {
         verify(userRepository, Mockito.times(1)).delete(user);
         verify(userRepository, Mockito.never()).deleteById(nonExistingId);
     }
+
+    @Test
+    void shouldNotDeleteAndThrowObjectNotFoundExceptionWhenUserDoesNotExist() {
+        // Arrange
+        final String EXPECTED_MESSAGE = "User not found with id: " + nonExistingId;
+        when(userRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        // Act
+        Executable executable = () -> userService.delete(nonExistingId);
+
+        // Assert
+        Exception exception = assertThrows(ObjectNotFoundException.class, executable);
+        assertEquals(EXPECTED_MESSAGE, exception.getMessage());
+
+        verify(userRepository, Mockito.times(1)).findById(nonExistingId);
+        verify(userRepository, Mockito.never()).delete(user);
+        verify(userRepository, Mockito.never()).deleteById(nonExistingId);
+    }
 }
