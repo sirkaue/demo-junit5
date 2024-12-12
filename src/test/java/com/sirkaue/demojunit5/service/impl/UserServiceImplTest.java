@@ -40,6 +40,7 @@ class UserServiceImplTest {
     private UserResponseDto userResponseDto;
     private Long existingId;
     private Long nonExistingId;
+    private String updatedEmail;
 
     @BeforeEach
     void setUp() {
@@ -48,6 +49,7 @@ class UserServiceImplTest {
         userResponseDto = UserFactory.createDefaultUserResponseDto();
         existingId = UserFactory.getExistingId();
         nonExistingId = UserFactory.getNonExistingId();
+        updatedEmail = UserFactory.createUpdatedUserRequestDto().email();
     }
 
     @Test
@@ -232,5 +234,28 @@ class UserServiceImplTest {
         verify(userRepository, Mockito.times(1)).findById(nonExistingId);
         verify(userRepository, Mockito.never()).existsByEmail(user.getEmail());
         verify(userRepository, Mockito.never()).save(user);
+    }
+
+    @Test
+    void shouldNotUpdateAndThrowEmailUniqueViolationExceptionWhenEmailIsAlreadyInUse() {
+        // Arrange
+        final String EXPECTED_MESSAGE = "Email already exists: " + updatedEmail;
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmail(updatedEmail)).thenReturn(true);
+
+        // Act
+        var exception = assertThrows(EmailUniqueViolationException.class,
+                () -> userService.update(user.getId(), userRequestDto));
+
+        // Assert
+        assertEquals(EXPECTED_MESSAGE, exception.getMessage());
+        assertEquals(user.getId(), userResponseDto.id());
+        assertEquals(user.getName(), userResponseDto.name());
+        assertEquals(user.getEmail(), userResponseDto.email());
+
+        verify(userRepository, times(1)).findById(user.getId());
+        verify(userRepository, times(1)).existsByEmail(updatedEmail);
+        verify(userRepository, never()).save(user);
     }
 }
