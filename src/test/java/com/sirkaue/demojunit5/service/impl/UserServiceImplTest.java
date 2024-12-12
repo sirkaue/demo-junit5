@@ -47,6 +47,7 @@ class UserServiceImplTest {
         user = UserFactory.createDefaultUser();
         userRequestDto = UserFactory.createDefaultUserRequestDto();
         userResponseDto = UserFactory.createDefaultUserResponseDto();
+        userRequestDto = UserFactory.createUpdatedUserRequestDto();
         existingId = UserFactory.getExistingId();
         nonExistingId = UserFactory.getNonExistingId();
         updatedEmail = UserFactory.createUpdatedUserRequestDto().email();
