@@ -5,14 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @ActiveProfiles("test")
 @Sql(scripts = "/sql/import.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Transactional
 class UserRepositoryIT {
 
     @Autowired
@@ -28,5 +27,18 @@ class UserRepositoryIT {
 
         // Assert
         assertTrue(exists, "O método deve retornar true para um ID existente.");
+    }
+
+    @Test
+    @Sql(scripts = "/sql/delete.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void shouldReturnFalseWhenIdDoesNotExist() {
+        // Arrange
+        final long NON_EXISTING_ID = 3L;
+
+        // Act
+        boolean exists = userRepository.existsById(NON_EXISTING_ID);
+
+        // Assert
+        assertFalse(exists, "O método deve retornar false para um ID inexistente.");
     }
 }
