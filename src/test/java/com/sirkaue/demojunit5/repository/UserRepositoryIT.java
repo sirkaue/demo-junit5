@@ -50,4 +50,14 @@ class UserRepositoryIT {
         // Assert
         assertFalse(users.isEmpty(), "O método deve retornar uma lista não vazia.");
     }
+
+    @Test
+    @Sql(scripts = "/sql/delete.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void shouldReturnEmptyListWhenFindAllDoesNotFindAnyUser() {
+        // Act
+        var users = userRepository.findAll();
+
+        // Assert
+        assertTrue(users.isEmpty(), "O método deve retornar uma lista vazia.");
+    }
 }
