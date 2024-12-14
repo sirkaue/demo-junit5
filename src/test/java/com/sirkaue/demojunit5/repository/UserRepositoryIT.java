@@ -41,4 +41,13 @@ class UserRepositoryIT {
         // Assert
         assertFalse(exists, "O método deve retornar false para um ID inexistente.");
     }
+
+    @Test
+    void shouldReturnFindAll() {
+        // Act
+        var users = userRepository.findAll();
+
+        // Assert
+        assertFalse(users.isEmpty(), "O método deve retornar uma lista não vazia.");
+    }
 }
