@@ -1,13 +1,13 @@
 package com.sirkaue.demojunit5.repository;
 
+import com.sirkaue.demojunit5.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -59,5 +59,25 @@ class UserRepositoryIT {
 
         // Assert
         assertTrue(users.isEmpty(), "O método deve retornar uma lista vazia.");
+    }
+
+    @Test
+    void shouldCreateUserIfEmailDoesNotExist() {
+        // Arrange
+        User user = new User();
+        user.setName("Jane");
+        user.setEmail("jane@email.com");
+        user.setPassword("123456");
+
+        // Act
+        userRepository.save(user);
+
+        // Assert
+        var savedUser = userRepository.findById(user.getId()).orElse(null);
+        assertNotNull(savedUser, "O usuário deve ser salvo.");
+        assertEquals(user.getId(), savedUser.getId(), "O ID do usuário deve ser salvo.");
+        assertEquals("Jane", savedUser.getName(), "O nome do usuário deve ser salvo.");
+        assertEquals("jane@email.com", savedUser.getEmail(), "O e-mail do usuário deve ser salvo.");
+        assertEquals("123456", savedUser.getPassword(), "A senha do usuário deve ser salva.");
     }
 }
