@@ -2,8 +2,10 @@ package com.sirkaue.demojunit5.repository;
 
 import com.sirkaue.demojunit5.domain.User;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -79,5 +81,21 @@ class UserRepositoryIT {
         assertEquals("Jane", savedUser.getName(), "O nome do usuário deve ser salvo.");
         assertEquals("jane@email.com", savedUser.getEmail(), "O e-mail do usuário deve ser salvo.");
         assertEquals("123456", savedUser.getPassword(), "A senha do usuário deve ser salva.");
+    }
+
+    @Test
+    void shouldNotCreateUserIfEmailExists() {
+        // Arrange
+        User userWithSameEmail = new User();
+        userWithSameEmail.setName("Bob");
+        userWithSameEmail.setEmail("john@email.com");
+        userWithSameEmail.setPassword("654321");
+
+        // Act
+        Executable executable = () -> userRepository.save(userWithSameEmail);
+
+        // Assert
+        assertThrows(DataIntegrityViolationException.class, executable,
+                "Deve lançar uma exceção quando tentar salvar um usuário com e-mail já existente.");
     }
 }
