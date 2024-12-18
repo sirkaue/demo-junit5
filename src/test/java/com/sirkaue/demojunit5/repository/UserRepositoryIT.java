@@ -148,4 +148,16 @@ class UserRepositoryIT {
         // Assert
         assertFalse(userRepository.existsById(EXISTING_ID), "O usuário deve ser deletado.");
     }
+
+    @Test
+    void shouldNotDeleteUserWhenDoesNotExist() {
+        // Arrange
+        final long NON_EXISTENT_USER_ID = 3L;
+
+        // Act
+        Executable executable = () -> userRepository.deleteById(NON_EXISTENT_USER_ID);
+
+        // Assert
+        assertDoesNotThrow(executable, "Não deve lançar exceção ao tentar deletar um usuário inexistente.");
+    }
 }
