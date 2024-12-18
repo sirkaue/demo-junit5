@@ -136,4 +136,16 @@ class UserRepositoryIT {
         assertEquals(user.getId(), updatedUser.getId(), "O ID do usuário deve ser atualizado.");
         assertEquals("Jane Doe", updatedUser.getName(), "O nome do usuário deve ser atualizado.");
     }
+
+    @Test
+    void shouldDeleteUserWhenExistsById() {
+        // Arrange
+        final long EXISTING_ID = 1L;
+
+        // Act
+        userRepository.deleteById(EXISTING_ID);
+
+        // Assert
+        assertFalse(userRepository.existsById(EXISTING_ID), "O usuário deve ser deletado.");
+    }
 }
