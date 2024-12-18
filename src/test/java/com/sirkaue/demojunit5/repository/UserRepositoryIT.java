@@ -6,6 +6,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -97,5 +98,23 @@ class UserRepositoryIT {
         // Assert
         assertThrows(DataIntegrityViolationException.class, executable,
                 "Deve lançar uma exceção quando tentar salvar um usuário com e-mail já existente.");
+    }
+
+    @Test
+    void shouldNotUpdateWhenUserDoesNotExist() {
+        // Arrange
+        final long NON_EXISTING_ID = 3L;
+
+        // Act & Assert
+        assertThrows(EmptyResultDataAccessException.class, () -> {
+            User user = userRepository.findById(NON_EXISTING_ID).orElseThrow(
+                    () -> new EmptyResultDataAccessException(1));
+
+            // Se o usuário não for encontrado, o código nunca chega a esta linha
+            user.setName("Jane Doe");
+            user.setEmail("jane.doe@example.com");
+            user.setPassword("654321");
+            userRepository.save(user);
+        }, "Deve lançar uma exceção ao tentar atualizar um usuário inexistente.");
     }
 }
