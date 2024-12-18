@@ -117,4 +117,23 @@ class UserRepositoryIT {
             userRepository.save(user);
         }, "Deve lançar uma exceção ao tentar atualizar um usuário inexistente.");
     }
+
+    @Test
+    void shouldUpdateUserWhenExists() {
+        // Arrange
+        final long EXISTING_ID = 1L;
+        User user = userRepository.findById(EXISTING_ID).orElseThrow();
+
+        // Act
+        user.setName("Jane Doe");
+        user.setEmail("jane@email.com");
+        user.setPassword("654321");
+        userRepository.save(user);
+
+        // Assert
+        var updatedUser = userRepository.findById(user.getId()).orElseThrow();
+        assertNotNull(updatedUser, "O usuário deve ser atualizado.");
+        assertEquals(user.getId(), updatedUser.getId(), "O ID do usuário deve ser atualizado.");
+        assertEquals("Jane Doe", updatedUser.getName(), "O nome do usuário deve ser atualizado.");
+    }
 }
