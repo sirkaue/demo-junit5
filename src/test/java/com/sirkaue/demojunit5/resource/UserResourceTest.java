@@ -2,6 +2,7 @@ package com.sirkaue.demojunit5.resource;
 
 import com.sirkaue.demojunit5.domain.User;
 import com.sirkaue.demojunit5.dto.response.UserResponseDto;
+import com.sirkaue.demojunit5.exception.ObjectNotFoundException;
 import com.sirkaue.demojunit5.factory.UserFactory;
 import com.sirkaue.demojunit5.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,12 +27,13 @@ class UserResourceTest {
 
     @MockBean
     private UserService userService;
-
     private User user;
+    private Long nonExistingId;
 
     @BeforeEach
     void setUp() {
         user = UserFactory.createDefaultUser();
+        nonExistingId = UserFactory.getNonExistingId();
     }
 
     @Test
@@ -47,6 +49,19 @@ class UserResourceTest {
                 .andExpect(jsonPath("$.name").value(user.getName()))
                 .andExpect(jsonPath("$.email").value(user.getEmail()))
                 .andExpect(jsonPath("$.password").doesNotExist())
+                .andDo(print());
+    }
+
+    @Test
+    void shouldThrowObjectNotFoundExceptionWhenIdDoesNotExist() throws Exception {
+        // Arrange
+        when(userService.findById(nonExistingId)).thenThrow(new ObjectNotFoundException("Resource not found"));
+
+        // Act and Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}", nonExistingId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Resource not found"))
                 .andDo(print());
     }
 }
