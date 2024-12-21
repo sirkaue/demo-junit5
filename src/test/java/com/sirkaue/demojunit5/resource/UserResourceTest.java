@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.List;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -62,6 +64,22 @@ class UserResourceTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Resource not found"))
+                .andDo(print());
+    }
+
+    @Test
+    void shouldFindAllWhenExistsUsers() throws Exception {
+        // Arrange
+        when(userService.findAll()).thenReturn(List.of(new UserResponseDto(user.getId(), user.getName(), user.getEmail())));
+
+        // Act and Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/users")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(user.getId()))
+                .andExpect(jsonPath("$[0].name").value(user.getName()))
+                .andExpect(jsonPath("$[0].email").value(user.getEmail()))
+                .andExpect(jsonPath("$[0].password").doesNotExist())
                 .andDo(print());
     }
 }
